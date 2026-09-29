@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dream House Designer — Version 3</title>
+<style>
+:root{
+ --bg:#f4f7fb;--card:#fff;--panel:#eef3f8;--text:#172033;--muted:#667085;
+ --border:#cfd8e3;--accent:#2563eb;--accent-bg:#dbeafe;
+ --s2:#60a5fa;--s3:#34d399;--s4:#fbbf24;--s5:#c084fc;--s6:#fb7185;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+.wrap{max-width:1400px;margin:auto;padding:18px}.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.topgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:16px}
+label{font-size:14px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:9px;background:white;color:var(--text);margin-top:5px}
+button{min-height:42px;border:1px solid var(--border);border-radius:9px;background:white;color:var(--text);padding:8px 12px;cursor:pointer}
+button.active{outline:2px solid var(--accent);background:var(--accent-bg)}.buttons{display:flex;flex-wrap:wrap;gap:8px}.toolgrid,.furngrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+h1{margin:0 0 4px;font-size:25px}h2{font-size:18px}h3{font-size:15px}.muted{color:var(--muted);font-size:14px}.section{margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.workspace{overflow-x:auto}.plan{display:block;min-width:800px;width:100%;touch-action:none;user-select:none}.room-shape{cursor:grab}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hidden{display:none!important}
+.meter{height:9px;background:var(--panel);border-radius:20px;overflow:hidden}.meter>div{height:100%;background:var(--accent)}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid var(--border);padding:9px;text-align:left}th:nth-child(2),td:nth-child(2){text-align:center}
+.summarygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.big{font-size:22px;font-weight:bold}.roomitem{border:1px solid var(--border);padding:9px;border-radius:8px}
+.notice{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px}.tabs{margin:14px 0}
+@media(max-width:850px){.topgrid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.summarygrid,.twocol{grid-template-columns:1fr}}
+@media(max-width:520px){.topgrid{grid-template-columns:1fr}.wrap{padding:10px}}
+@media print{body{background:white}.no-print,.tabs,#pane-design,#pane-assignment,#pane-rubric{display:none!important}#pane-summary{display:block!important}.wrap{max-width:none;padding:0}.card{border:none}}
+</style>
+</head>
+<body>
+<div id="app" class="wrap">
+<header>
+<h1>Dream House Designer</h1>
+<p class="muted">STEM Floor Plan Project — Version 3</p>
+</header>
+
+<div class="topgrid card">
+<label>Student name<input id="studentName" placeholder="Your name"></label>
+<label>Class / period<input id="className" placeholder="Example: 6A"></label>
+<label>Project title<input id="projectTitle" value="Dream House Project"></label>
+<label>Mode<select id="teacherMode"><option value="off">Student</option><option value="on">Teacher</option></select></label>
+</div>
+
+<div class="tabs buttons no-print">
+<button class="tab active" data-tab="design">Design</button>
+<button class="tab" data-tab="assignment">Assignment</button>
+<button class="tab" data-tab="rubric">Rubric</button>
+<button class="tab" data-tab="summary">Final Summary</button>
+</div>
+
+<section id="pane-design">
+<div class="layout">
+<aside class="card no-print">
+<h2>Architect tools</h2><p class="muted">Each small grid square = 1 foot.</p>
+<label>Room type<select id="roomType"><option>Bedroom</option><option>Bathroom</option><option>Kitchen</option><option>Living Room</option><option>Dining Room</option><option>Garage</option><option>Office</option><option>Laundry Room</option></select></label>
+<div class="toolgrid section">
+<button class="tool active" data-tool="room">Room</button><button class="tool" data-tool="move">Move</button>
+<button class="tool" data-tool="door">Door</button><button class="tool" data-tool="window">Window</button>
+<button class="tool" data-tool="erase">Erase</button>
+</div>
+<div class="section"><h3>Furniture</h3><div class="furngrid">
+<button class="furn" data-kind="Bed">🛏 Bed</button><button class="furn" data-kind="Sofa">▰ Sofa</button>
+<button class="furn" data-kind="Table">▣ Table</button><button class="furn" data-kind="Sink">◉ Sink</button>
+<button class="furn" data-kind="Toilet">◒ Toilet</button><button class="furn" data-kind="Stove">▦ Stove</button>
+</div></div>
+<div class="section"><h3>Requirements</h3><ul id="reqs">
+<li data-type="Bedroom" data-count="3">○ 3 bedrooms</li><li data-type="Bathroom" data-count="2">○ 2 bathrooms</li>
+<li data-type="Kitchen" data-count="1">○ kitchen</li><li data-type="Living Room" data-count="1">○ living room</li></ul></div>
+<div id="teacherControls" class="section hidden"><h3>Teacher controls</h3><label>Square-foot limit<input id="sqLimit" type="number" min="500" max="5000" value="2000"></label></div>
+<div class="section"><span class="muted">House size</span><div class="big"><span id="area">0</span> sq ft</div><div>Maximum: <span id="limitLabel">2,000</span> sq ft</div><div class="meter"><div id="meter" style="width:0"></div></div></div>
+</aside>
+
+<main>
+<div class="toolbar no-print"><div><h2>House blueprint</h2><p id="msg" class="muted">Drag across the grid to draw a room.</p></div>
+<div class="buttons"><button id="saveProject">Save</button><button id="loadProject">Load</button><button id="undo">Undo</button><button id="clear">Clear</button></div></div>
+<div class="workspace card"><svg id="plan" class="plan" viewBox="0 0 900 560" aria-label="Interactive floor plan workspace"></svg></div>
+<div class="twocol" style="margin-top:12px"><div class="card"><h3>Room measurements</h3><div id="measurements" class="muted">No rooms yet.</div></div><div class="card"><h3>Design check</h3><div id="check">Start designing your house.</div></div></div>
+</main>
+</div>
+</section>
+
+<section id="pane-assignment" class="hidden"><div class="card"><h2>Dream House STEM Assignment</h2>
+<p>Design a functional home using the floor-plan tool. Every small square represents 1 foot.</p>
+<ol><li>Create at least 3 bedrooms.</li><li>Create at least 2 bathrooms.</li><li>Add a kitchen and living room.</li><li>Stay at or below the assigned square-foot limit.</li><li>Add doors and windows so rooms can be entered and have light.</li><li>Add furniture to show how each room will be used.</li><li>Check the area of each room and total house area.</li><li>Write a short explanation of your design choices.</li></ol>
+<label>Design explanation<textarea id="explanation" rows="7" placeholder="Explain why you arranged the rooms this way..."></textarea></label></div></section>
+
+<section id="pane-rubric" class="hidden"><div class="card"><h2>Project Rubric — 100 points</h2><div style="overflow-x:auto"><table>
+<thead><tr><th>Category</th><th>Points</th><th>What earns full credit</th></tr></thead><tbody>
+<tr><td>Required rooms</td><td>25</td><td>All required rooms are included.</td></tr>
+<tr><td>Measurements &amp; area</td><td>25</td><td>Dimensions and square footage are reasonable and within the limit.</td></tr>
+<tr><td>Layout &amp; function</td><td>20</td><td>Rooms are arranged logically and can be accessed.</td></tr>
+<tr><td>Doors, windows &amp; furniture</td><td>15</td><td>Details help show how the home would function.</td></tr>
+<tr><td>Design explanation</td><td>15</td><td>Student clearly explains major design choices.</td></tr>
+</tbody></table></div></div></section>
+
+<section id="pane-summary" class="hidden"><div class="card"><div class="toolbar"><div><h2 id="summaryTitle">Dream House Project</h2><p><span id="summaryName">Student</span> • <span id="summaryClass">Class</span></p></div><button id="printBtn" class="no-print">Print</button></div>
+<div class="summarygrid"><div class="roomitem"><span class="muted">Total area</span><div id="summaryArea" class="big">0 sq ft</div></div><div class="roomitem"><span class="muted">Rooms</span><div id="summaryRooms" class="big">0</div></div><div class="roomitem"><span class="muted">Requirements</span><div id="summaryReq" class="big">Incomplete</div></div></div>
+<h3>Design explanation</h3><p id="summaryExplanation" class="muted">No explanation added yet.</p><h3>Room list</h3><div id="summaryList"></div></div></section>
+
+<div class="notice no-print" style="margin-top:14px"><strong>Challenge:</strong> Build a functional house with 3 bedrooms, 2 bathrooms, a kitchen, and a living room while staying under the assigned square-foot limit.</div>
+</div>
+
+<script>
+(()=>{
+const root=document.getElementById('app'),svg=document.getElementById('plan'),NS='http://www.w3.org/2000/svg',C=20,W=900,H=560,COLS=45,ROWS=28;
+let rooms=[],objects=[],history=[],tool='room',start=null,preview=null,id=1,drag=null;
+const msg=document.getElementById('msg'),sel=document.getElementById('roomType');
+const colors=['var(--s2)','var(--s3)','var(--s4)','var(--s5)','var(--s6)'];
+function E(n,a={}){const e=document.createElementNS(NS,n);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));return e}
+function limit(){let v=Number(document.getElementById('sqLimit').value);return Number.isFinite(v)&&v>=500?Math.min(5000,v):2000}
+function snap(e){let p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;let q=p.matrixTransform(svg.getScreenCTM().inverse());return{x:Math.max(0,Math.min(COLS-1,Math.floor(q.x/C))),y:Math.max(0,Math.min(ROWS-1,Math.floor(q.y/C)))}}
+function rect(a,b){return{x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(a.x-b.x)+1,h:Math.abs(a.y-b.y)+1}}
+function overlap(a,ignore){return rooms.some(r=>r.id!==ignore&&a.x<r.x+r.w&&a.x+a.w>r.x&&a.y<r.y+r.h&&a.y+a.h>r.y)}
+function hist(){history.push(JSON.stringify({rooms,objects}));if(history.length>40)history.shift()}
+function grid(){svg.innerHTML='';svg.appendChild(E('rect',{width:W,height:H,fill:'white'}));for(let x=0;x<=W;x+=C)svg.appendChild(E('line',{x1:x,y1:0,x2:x,y2:H,stroke:'#d7dee8','stroke-width':x%100?'.55':'1.2'}));for(let y=0;y<=H;y+=C)svg.appendChild(E('line',{x1:0,y1:y,x2:W,y2:y,stroke:'#d7dee8','stroke-width':y%100?'.55':'1.2'}));render()}
+function render(){svg.querySelectorAll('.dynamic').forEach(n=>n.remove());rooms.forEach((r,i)=>{let g=E('g',{class:'dynamic'}),q=E('rect',{class:'room-shape',x:r.x*C,y:r.y*C,width:r.w*C,height:r.h*C,fill:colors[i%5],'fill-opacity':'.22',stroke:'#172033','stroke-width':'3','data-id':r.id});g.appendChild(q);let t=E('text',{x:(r.x+r.w/2)*C,y:(r.y+r.h/2)*C,'text-anchor':'middle','dominant-baseline':'middle',fill:'#172033','font-size':'13','font-weight':'600','pointer-events':'none'}),a=E('tspan',{x:(r.x+r.w/2)*C,dy:'-9'}),b=E('tspan',{x:(r.x+r.w/2)*C,dy:'18'});a.textContent=r.type;b.textContent=r.w+' × '+r.h+' ft';t.append(a,b);g.appendChild(t);svg.appendChild(g)});objects.forEach(o=>{let t=E('text',{class:'dynamic',x:o.x*C+C/2,y:o.y*C+C/2,'text-anchor':'middle','dominant-baseline':'middle',fill:'#172033','font-size':o.kind==='Door'||o.kind==='Window'?'18':'15','data-oid':o.id});t.textContent=o.kind==='Door'?'◜':o.kind==='Window'?'═':o.kind==='Bed'?'🛏':o.kind==='Sofa'?'▰':o.kind==='Table'?'▣':o.kind==='Sink'?'◉':o.kind==='Toilet'?'◒':'▦';svg.appendChild(t)});stats()}
+function completed(c){return(c.Bedroom||0)>=3&&(c.Bathroom||0)>=2&&(c.Kitchen||0)>=1&&(c['Living Room']||0)>=1}
+function stats(){let total=rooms.reduce((s,r)=>s+r.w*r.h,0),lim=limit(),c={};rooms.forEach(r=>c[r.type]=(c[r.type]||0)+1);document.getElementById('area').textContent=total.toLocaleString();document.getElementById('limitLabel').textContent=lim.toLocaleString();document.getElementById('meter').style.width=Math.min(100,total/lim*100)+'%';document.querySelectorAll('#reqs li').forEach(li=>{let n=c[li.dataset.type]||0,need=+li.dataset.count,label=li.dataset.type==='Bedroom'?'3 bedrooms':li.dataset.type==='Bathroom'?'2 bathrooms':li.dataset.type.toLowerCase();li.textContent=(n>=need?'✓ ':'○ ')+label});let m=document.getElementById('measurements');m.innerHTML='';if(!rooms.length)m.innerHTML='<span class="muted">No rooms yet.</span>';rooms.forEach(r=>{let d=document.createElement('div');d.className='roomitem';d.textContent=r.type+': '+r.w+' ft × '+r.h+' ft = '+r.w*r.h+' sq ft';m.appendChild(d)});let done=completed(c);document.getElementById('check').textContent=total>lim?'⚠ Your house exceeds the '+lim.toLocaleString()+' sq ft limit.':done?'✓ Required rooms complete. Now check doors, windows, furniture, and traffic flow.':'Keep designing — some required rooms are still missing.';summary(total,done)}
+function summary(total,done){document.getElementById('summaryTitle').textContent=document.getElementById('projectTitle').value||'Dream House Project';document.getElementById('summaryName').textContent=document.getElementById('studentName').value||'Student';document.getElementById('summaryClass').textContent=document.getElementById('className').value||'Class';document.getElementById('summaryArea').textContent=total.toLocaleString()+' sq ft';document.getElementById('summaryRooms').textContent=rooms.length;document.getElementById('summaryReq').textContent=done?'Complete':'Incomplete';document.getElementById('summaryExplanation').textContent=document.getElementById('explanation').value.trim()||'No explanation added yet.';let list=document.getElementById('summaryList');list.innerHTML='';rooms.forEach(r=>{let d=document.createElement('div');d.className='roomitem';d.textContent=r.type+' — '+r.w+' × '+r.h+' ft — '+r.w*r.h+' sq ft';list.appendChild(d)});if(!rooms.length)list.innerHTML='<span class="muted">No rooms yet.</span>'}
+function setTool(t){tool=t;document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));msg.textContent=t==='room'?'Drag across the grid to draw a '+sel.value+'.':t==='move'?'Drag an existing room to move it.':t==='erase'?'Click a room or object to erase it.':'Click the grid to place a '+t+'.'}
+document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
+document.querySelectorAll('.furn').forEach(b=>b.addEventListener('click',()=>{tool='furniture';document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));root.dataset.furn=b.dataset.kind;msg.textContent='Click inside a room to place a '+b.dataset.kind+'.'}));
+sel.addEventListener('change',()=>{if(tool==='room')setTool('room')});
+svg.addEventListener('pointerdown',e=>{let p=snap(e),rid=e.target.dataset.id,oid=e.target.dataset.oid;if(tool==='erase'){if(rid){hist();rooms=rooms.filter(r=>String(r.id)!==rid);render()}else if(oid){hist();objects=objects.filter(o=>String(o.id)!==oid);render()}return}if(tool==='door'||tool==='window'||tool==='furniture'){hist();objects.push({id:id++,kind:tool==='furniture'?root.dataset.furn:tool[0].toUpperCase()+tool.slice(1),x:p.x,y:p.y});render();return}if(tool==='move'&&rid){let r=rooms.find(x=>String(x.id)===rid);hist();drag={id:r.id,dx:p.x-r.x,dy:p.y-r.y};svg.setPointerCapture(e.pointerId);return}if(tool==='room'){start=p;svg.setPointerCapture(e.pointerId)}});
+svg.addEventListener('pointermove',e=>{let p=snap(e);if(drag){let r=rooms.find(x=>x.id===drag.id),nx=Math.max(0,Math.min(COLS-r.w,p.x-drag.dx)),ny=Math.max(0,Math.min(ROWS-r.h,p.y-drag.dy)),candidate={...r,x:nx,y:ny};if(!overlap(candidate,r.id)){r.x=nx;r.y=ny;render()}return}if(!start||tool!=='room')return;let r=rect(start,p);if(preview)preview.remove();preview=E('rect',{class:'dynamic',x:r.x*C,y:r.y*C,width:r.w*C,height:r.h*C,fill:'#dbeafe','fill-opacity':'.6',stroke:overlap(r)?'#e11d48':'#2563eb','stroke-width':'3','stroke-dasharray':'7 5','pointer-events':'none'});svg.appendChild(preview);msg.textContent=sel.value+': '+r.w+' × '+r.h+' ft = '+r.w*r.h+' sq ft'+(overlap(r)?' — overlaps another room':'')});
+svg.addEventListener('pointerup',e=>{if(drag){drag=null;render();return}if(!start||tool!=='room')return;let r=rect(start,snap(e));if(!overlap(r)){hist();rooms.push({...r,id:id++,type:sel.value});msg.textContent=sel.value+' added.'}else msg.textContent='Rooms cannot overlap. Try another location.';start=null;preview=null;render()});
+document.getElementById('undo').onclick=()=>{if(history.length){let s=JSON.parse(history.pop());rooms=s.rooms;objects=s.objects;render()}};
+document.getElementById('clear').onclick=()=>{if(rooms.length||objects.length){hist();rooms=[];objects=[];render()}};
+document.getElementById('saveProject').onclick=()=>{let d={rooms,objects,studentName:studentName.value,className:className.value,projectTitle:projectTitle.value,explanation:explanation.value,sqLimit:limit(),id};localStorage.setItem('dreamHouseProjectV3',JSON.stringify(d));msg.textContent='Project saved on this browser.'};
+document.getElementById('loadProject').onclick=()=>{let raw=localStorage.getItem('dreamHouseProjectV3');if(!raw){msg.textContent='No saved project found.';return}try{let d=JSON.parse(raw);rooms=d.rooms||[];objects=d.objects||[];studentName.value=d.studentName||'';className.value=d.className||'';projectTitle.value=d.projectTitle||'Dream House Project';explanation.value=d.explanation||'';sqLimit.value=d.sqLimit||2000;id=d.id||1;render();msg.textContent='Saved project loaded.'}catch(e){msg.textContent='Could not load the saved project.'}};
+teacherMode.onchange=()=>teacherControls.classList.toggle('hidden',teacherMode.value!=='on');sqLimit.oninput=stats;
+['studentName','className','projectTitle','explanation'].forEach(x=>document.getElementById(x).addEventListener('input',stats));
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));['design','assignment','rubric','summary'].forEach(n=>document.getElementById('pane-'+n).classList.toggle('hidden',n!==b.dataset.tab));stats()});
+printBtn.onclick=()=>window.print();grid();
+})();
+</script>
+</body>
+</html>
